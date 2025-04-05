@@ -1,29 +1,8 @@
 from flask import Flask, render_template, request, jsonify
 import re
+from validation import validate_username, validate_email, validate_password
 
 app = Flask(__name__)
-
-def validate_username(username):
-    errors = []
-    if len(username) < 5:
-        errors.append("At least 5 characters")
-    if not re.match(r"^[a-zA-Z0-9_]+$", username):
-        errors.append("User Name allows only alphanumeric characters and underscores")
-    return errors
-
-def validate_password(password):
-    errors = []
-    if len(password) < 8:
-        errors.append("At least 8 characters")
-    if not re.search(r"[A-Z]", password):
-        errors.append("At least one uppercase letter")
-    if not re.search(r"[a-z]", password):
-        errors.append("At least one lowercase letter")
-    if not re.search(r"\d", password):
-        errors.append("At least one digit")
-    if not re.search(r"[!@#$%^&*(),.?\":{}|<>]", password):
-        errors.append("At least one special character")
-    return errors
 
 @app.route('/')
 def index():
@@ -41,6 +20,13 @@ def validate_username_route():
     data = request.get_json()
     username = data.get('username', '')
     errors = validate_username(username)
+    return jsonify({'errors': errors})
+
+@app.route('/validate-email', methods=['POST'])
+def validate_email_route():
+    data = request.get_json()
+    email = data.get('email', '')
+    errors = validate_email(email)
     return jsonify({'errors': errors})
 
 @app.route('/register', methods=['POST'])
