@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<link rel="stylesheet" href="{{ url_for('static', filename='registraction-from-style.css') }}">
+<!-- Add jQuery CDN -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<html>
+<head>
+    <title>Registration</title>
+</head>
+<body>
+    <div class="container">
+    <h2>Create User Account</h2>
+    <form method="POST" action="/register" class="reg-form">
+        <label>Username:</label>
+        <input type="text" name="username" id="user_name" required>
+        <div id="username-error" class="error-message"></div>
+        <br>
+
+        <label>Password:</label>
+        <input type="password" name="password" id="password" required>
+        <div id="password-error" class="error-message"></div>
+        <br>
+
+        <label>Confirm Password:</label>
+        <input type="password" name="confirm_password" id="confirm_password" required>
+        <div id="Confirm-password-error" class="error-message"></div>
+        <br>
+
+        <input type="submit" value="Register">
+    </form>
+</div>
+
+    <script>
+        $(document).ready(function (){
+            $('#password').on('blur', function () {
+                const password = this.value;
+                fetch('/validate-password', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ password: password })
+                })
+                .then(res => res.json())
+                .then(data => {
+                    const errorDiv = document.getElementById('password-error');
+                    if (data.errors.length > 0) {
+                        errorDiv.innerHTML = data.errors.join("<br>");
+                    } else {
+                        errorDiv.innerHTML = '';
+                    }
+                });
+            });
+            //
+            $('#confirm_password').on('blur', function () {
+                const password = document.getElementById('password').value;
+                const confirmPassword = this.value;
+                const errorDiv = document.getElementById('Confirm-password-error');
+                if (password !== confirmPassword) {
+                    errorDiv.innerHTML = "Passwords do not match.";
+                } else {
+                    errorDiv.innerHTML = '';
+                }
+            });
+            $('#user_name').on('blur', function () {
+                const username = this.value;
+                fetch('/validate-username', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ username: username })
+                })
+                .then(res => res.json())
+                .then(data => {
+                    const errorDiv = document.getElementById('username-error');
+                    if (data.errors.length > 0) {
+                        errorDiv.innerHTML = data.errors.join("<br>");
+                    } else {
+                        errorDiv.innerHTML = '';
+                    }
+                });
+            });
+
+            $('.reg-form').on('submit', function (event) {
+                const passwordError = document.getElementById('password-error').innerHTML;
+                const confirmPasswordError = document.getElementById('Confirm-password-error').innerHTML;
+                const usernameError = document.getElementById('username-error').innerHTML;
+
+                if (passwordError || confirmPasswordError || usernameError) {
+                    event.preventDefault();
+                    alert("Please fix the errors before submitting.");
+                }
+            });
+            //
+
+        });
+        
+        
+    </script>
+</body>
+</html>
